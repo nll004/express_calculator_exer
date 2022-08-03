@@ -122,7 +122,7 @@ app.get('/mean', (req, res) => {
     return res.json(response)
 })
 
-app.get('/all', (req, res) =>{
+app.get('/all', (req, res, next) =>{
     let queryObj = req.query
     if (!queryObj.nums) {
         return res.json('Please check that your query includes numbers using this format "?nums=1,2,3,4,5,6"')
@@ -132,7 +132,9 @@ app.get('/all', (req, res) =>{
         numArray = convertToNumArrayAndSort(queryObj.nums)
     }
     catch (err) {
-        return res.json(`Error Occurred! Status ${err.status}, ${err.message}`)
+        return next(err)
+        // used app.use in this route to practice handling errors with it
+        // return res.json(`Error Occurred! Status ${err.status}, ${err.message}`)
     }
     const mean = meanOfNumArray(numArray)
     const mode = modeOfNumArray(numArray)
@@ -140,6 +142,11 @@ app.get('/all', (req, res) =>{
     let response = {operation: "all", "mean": mean, "mode": mode, "median": median}
 
     return res.json(response)
+})
+
+app.use((error, req, res, next) => {
+    console.error(error.message)
+    return res.json(error.message)
 })
 
 app.listen('5000', () => console.log("Node app running on port 5000"))
